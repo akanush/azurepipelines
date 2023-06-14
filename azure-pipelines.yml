@@ -9,26 +9,21 @@ trigger:
 pool:
   name: 'Default'
   vmImage: 'FirstWindowsAgent'
-
-strategy:
-  matrix:
-    Python27:
-      python.version: '2.x'
-    Python35:
-      python.version: '3.x'
     
 steps:
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+    versionSpec: '3.6'
+  displayName: 'Use Python 3.6'
 
 - script: |
     python -m pip install --upgrade pip
-    pip install -r requirements.txt
+    python -m pip install --upgrade build setuptools twine
   displayName: 'Install dependencies'
 
+- task: TwineAuthenticate@1
+  inputs:
+    artifactFeed: raw-coding-example-feed
+   
 - script: |
-    pip install pytest pytest-azurepipelines
-    pytest
-  displayName: 'pytest'
+   twine upload -r "raw-coding-example-feed" --config-file $(PYPIRC_PATH) dist/*
